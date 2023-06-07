@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="stylesheet" href="\css\bootstrap.css" media="all">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="\js\bootstrap.js"></script>
+<script src="\js\jspdf.min.js"></script>
+<script src="\js\moment.js"></script>
+<script src="\js\jspdf.plugin.autotable.js"></script>
+<link rel="stylesheet" href="\css\custom.css">
+<script src="https://kit.fontawesome.com/c171c885c2.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="\jquery-ui-1.12.1\jquery-ui.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+
+	$(document).ready(function () {
+		$("#tableSearch").on("keyup", function () {
+			var value = $(this).val().toLowerCase();
+			$("#myTable tr").filter(function () {
+				$(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
+			});
+		});
+	});
+
+</script>
+<script>
+	$(function () {
+		$("#datepicker").datepicker();
+		$("#datepicker").datepicker("option", "dateFormat", "yy-mm-dd");
+		$("#datepicker2").datepicker();
+		$("#datepicker2").datepicker("option", "dateFormat", "yy-mm-dd");
+	});
+</script>
+
+<script>
+	function filterRows() {
+		var from = $('#datepicker').val();
+		var to = $('#datepicker2').val();
+		var todo = document.getElementById("datepicker");
+		var todo2 = document.getElementById("datepicker2");
+		if (todo.value > todo2.value) {
+			Swal.fire({
+				icon: 'error',
+				title: 'Oops...',
+				text: 'La "fecha 1" debe ser anterior a la "fecha 2"!',
+			});
+			return;
+		};
+		from = from || '1970-01-01'; // default from to a old date if it is not set
+		to = to || '2999-12-31';
+
+		var dateFrom = moment(from);
+		var dateTo = moment(to);
+
+		$('#myTable tr').each(function (i, tr) {
+			var val = $(tr).find("td:nth-child(4)").text();
+			var dateVal = moment(val, "YYYY/MM/DD");
+			var visible = (dateVal.isBetween(dateFrom, dateTo, null, [])) ? "" : "none"; // [] for inclusive
+			$(tr).css('display', visible);
+		});
+	}
+
+	$('#datepicker').on("change", filterRows);
+	$('#datepicker2').on("change", filterRows);
+
+
+</script>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="icon" href="\images\favicon\favicon.ico" type="image/x-icon" />
+	<title>Lista de Ventas</title>
+
+
+</head>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+	<a class="navbar-brand" style="font-family: dkfont;cursor: default;color: white"> <img src="images\apple.png"
+			width="30" height="30" class="d-inline-block align-top" alt=""> SantaFeria App</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+		aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="collapse navbar-collapse" id="navbarNav">
+		<ul class="navbar-nav">
+			<li class="nav-item dropdown" id="navInv">
+
+				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown"
+					aria-haspopup="true" aria-expanded="false">
+					Inventario
+				</a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href='/addProduct'>Agregar Producto</a>
+					<a class="dropdown-item" href='/listProducts'>Lista de Productos</a>
+				</div>
+			</li>
+			<li class="nav-item dropdown" id="navVen">
+				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink2" data-toggle="dropdown"
+					aria-haspopup="true" aria-expanded="false">
+					Ventas
+				</a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href='/makeSale'>Realizar Venta</a>
+					<a class="dropdown-item" href='/listSales'>Lista de Ventas</a>
+				</div>
+			</li>
+
+			<li class="nav-item dropdown" id="navAdm">
+				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink3" data-toggle="dropdown"
+					aria-haspopup="true" aria-expanded="false">
+					Administrador
+				</a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href='/addUser'>Agregar Usuario</a>
+					<a class="dropdown-item" href='/listUsers'>Lista de Usuarios</a>
+					<a class="dropdown-item" href='/reportManag'>Gestión de Reportes</a>
+				</div>
+
+			</li>
+			<li class="nav-item dropdown" style="position: absolute; right: 120px">
+
+				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink3" data-toggle="dropdown"
+					aria-haspopup="true" aria-expanded="false"> <img src="\images\user.png" width="30" height="30">
+					Sesión
+				</a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item">
+						<p id="user" style="color: black"></p>
+					</a>
+					<script>
+						document.getElementById("user").innerHTML = "<%=sesion.nameUser%>";
+					</script>
+					<a class="dropdown-item" href="/passChange">Cambiar Contraseña</a>
+					<script>
+						function logout() {
+							Swal.fire({
+								title: '¿Estás seguro de que quieres cerrar sesión?',
+								icon: 'warning',
+								showCancelButton: true,
+								confirmButtonColor: '#3085d6',
+								cancelButtonColor: '#d33',
+								cancelButtonText: 'Cancelar',
+								confirmButtonText: 'Confirmar'
+							}).then((result) => {
+								if (result.value) {
+									let timerInterval;
+									Swal.fire({
+										title: 'Hasta la próxima!',
+										timer: 2000,
+										timerProgressBar: true,
+										onBeforeOpen: () => {
+											Swal.showLoading()
+											timerInterval = setInterval(() => {
+												const content = Swal.getContent()
+												if (content) {
+													const b = content.querySelector('b')
+													if (b) {
+														b.textContent = Swal.getTimerLeft()
+													}
+												}
+											}, 100)
+										},
+										onClose: () => {
+											clearInterval(timerInterval)
+										}
+									}).then((result) => {
+										/* Read more about handling dismissals below */
+										if (result.dismiss === Swal.DismissReason.timer) {
+											console.log('Message was closed by the timer')
+										}
+									});
+									window.location = '/';
+								}
+							})
+						}
+					</script>
+					<a class="dropdown-item" onclick="logout()" style="cursor:pointer">Cerrar Sesión</a>
+				</div>
+			</li>
+		</ul>
+	</div>
+	<script>
+		function preventBack() { window.history.forward(); }
+		setTimeout("preventBack()", 0);
+		window.onunload = function () { null };
+		var tipoUsuario = '<%= sesion.typeUser%>'; //acá va el tipo de usuario que puede ser int
+		var nav1 = document.getElementById('navInv');
+		var nav2 = document.getElementById('navVen');
+		var nav3 = document.getElementById('navAdm');
+		if (tipoUsuario == 'administrador') { //envés de admin puede ser el int
+
+			nav1.style.display = 'block';
+			nav2.style.display = 'block';
+			nav3.style.display = 'block';
+
+
+		} else {
+			if (tipoUsuario == 'ventas') {
+				nav1.style.display = 'none';
+				nav2.style.display = 'block';
+				nav3.style.display = 'none';
+
+			} else { //es Inventario
+				nav1.style.display = 'block';
+				nav2.style.display = 'none';
+				nav3.style.display = 'none';
+			}
+
+		}
+	</script>
+</nav>
+<div>
+	<break></break>
+</div>
+
+<body>
+	<% if(resultado != ""){ %>
+	<div class="container" align="center"
+		style="top: 165px; left: 400px; position: absolute; width: 500px; height: 20px">
+		<div class="alert alert-<%=restipo%>">
+			<strong>Alerta </strong>: <%=resultado%>
+		</div>
+	</div>
+	<% } %>
+	<img src="images\textura dk.jpg" alt="" style="border-radius: 15% ;position: absolute; top: 60px; 
+	left: 355px; width:645px;height:100px;;">
+	<div class="container" align="center">
+		<div class="titulos" align="center">
+			<h1 class="display-3"
+				style="position: relative;font-family: dkfont; font-size: 70px; color:red; font-weight: bold;text-shadow: 2px 0 0 #ffee00, -2px 0 0 		#ffee00, 0 2px 0 #ffee00, 0 -2px 0
+			#ffee00, 1px 1px #ffee00, -1px -1px 0 #ffee00, 1px -1px 0 #ffee00, 1px -1px 0 #ffee00, 1px -1px 0 #ffee00, -1px 1px 0 #ffee00">Lista
+				de Ventas</h1>
+			<!-- <p class="lead">Por favor, inicie sesión con los datos solicitados debajo</p> -->
+		</div>
+	</div>
+	<br> <br> <br> <br> <br> <br>
+	<div> <label> </label> </div>
+	<div class="container" align="center"
+		style="position: absolute; top: 255px; max-height: 400px; left: 128px; width: 1000px">
+
+		<div class="table-responsive-sm" align="right" style="max-height: 350px; left: 2px; overflow: auto">
+
+			<table class="table table-striped table-dark">
+				<thead>
+					<tr>
+						<th scope="col">Codigo</th>
+						<th scope="col">Monto total</th>
+						<th scope="col">Medio Pago</th>
+						<th scope="col">Fecha Venta</th>
+						<th scope="col">Acciones</th>
+					</tr>
+				</thead>
+				<tbody id="myTable">
+					<% for(var i=0; i < sales.rows.length; i++){ %>
+					<tr>
+						<td><%= sales.rows[i].codigo %></td>
+						<td><%= sales.rows[i].montototal %></td>
+						<td><%= sales.rows[i].mediopago %></td>
+
+						<%
+								var MyDate = sales.rows[i].fechaventa;
+								var MyDateString;
+							
+								MyDate.setDate(MyDate.getDate());
+								
+								MyDateString = MyDate.getFullYear() + "-" +
+												('0' + (MyDate.getMonth()+1)).slice(-2) + "-" +
+												('0' + MyDate.getDate()).slice(-2);
+							%>
+						<td>
+							<%= MyDateString %>
+						</td>
+
+						<td>
+							<span class="btn btn-info"> <a href="/detailSale?detven=<%= sales.rows[i].codigo %>"
+									style="color: white">Ver Detalle</a> </span>
+
+						</td>
+					</tr>
+					<% } %>
+				</tbody>
+			</table>
+		</div>
+
+	</div>
+
+	<div class="input-group md-form form-sm form-1 pl-0"
+		style="position: absolute; top: 230px; right: 260px;  width: 200px">
+		<div class="input-group-prepend">
+			<span class="input-group-text purple lighten-3" id="basic-text1" style="height: 25px">
+				<i class="fas fa-search " aria-hidden="true"></i>
+			</span>
+		</div>
+		<input class="form-control my-0 py-1" id="tableSearch" type="text" placeholder="Search" aria-label="Search">
+	</div>
+
+	<div style="position: absolute; top: 222px; left: 150px;">
+		<div class="input-group date" id="datetimepicker8">
+			<p> <span class="cuadgris">Fecha 1:</span> <input type="text" id="datepicker"></p>
+			<span class="input-group-text" style="max-height: 30px; margin-right: 4px">
+				<span class="fa fa-calendar">
+				</span>
+			</span>
+			<p><span class="cuadgris">Fecha 2:</span> <input type="text" id="datepicker2"></p>
+			<span class="input-group-text" style="max-height: 30px; margin-right: 4px">
+				<span class="fa fa-calendar">
+				</span>
+			</span>
+			<p> </p>
+			<button type="button" class="btn btn-warning" style="height: 30px; " id="tableSearch2"
+				onclick="filterRows()">Filtrar</button>
+		</div>
+
+	</div>
+	<img src="\images\superbananas.png" alt=""
+		style="position: absolute; top: 180px; right: 0px; width:320px;height:360px;">
+	<img src="\images\snake.png" alt="" style="position: absolute; top: 240px; left: 1px; width:140px;height:280px;">
+
+</body>
+<footer class="foo footer-dark bg-dark">
+	<div class="footer-copyright text-center py-1">© 2020 Copyright:
+		<a> SantaFeria</a>
+	</div>
+	<!-- Copyright -->
+
+</footer>
+
+</html>

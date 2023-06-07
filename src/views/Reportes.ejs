@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="stylesheet" href="css\bootstrap.css" media="all">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="js\bootstrap.js"></script>
+<script src="js\jspdf.min.js"></script>
+<script src="js\jspdf.plugin.autotable.js"></script>
+<link rel="stylesheet" href="css\custom.css">
+<script src="https://kit.fontawesome.com/c171c885c2.js" crossorigin="anonymous"></script>
+<link rel="stylesheet" href="jquery-ui-1.12.1\jquery-ui.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill"></script>
+<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script>
+	function preventBack() { window.history.forward(); }
+	setTimeout("preventBack()", 0);
+	window.onunload = function () { null };
+	function convert(str) {
+		var date = new Date(str), mnth = ("0" + (date.getMonth() + 1)).slice(-2), day = ("0" + date.getDate()).slice(-2);
+		return [date.getFullYear(), mnth, day].join("-");
+	}
+
+	function genUserReporte() {
+		let timerInterval
+		Swal.fire({
+			title: 'Generando Reporte...',
+			timer: 2000,
+			timerProgressBar: true,
+			onBeforeOpen: () => {
+				Swal.showLoading()
+				timerInterval = setInterval(() => {
+					const content = Swal.getContent()
+					if (content) {
+						const b = content.querySelector('b')
+						if (b) {
+							b.textContent = Swal.getTimerLeft()
+						}
+					}
+				}, 100)
+			},
+			onClose: () => {
+				clearInterval(timerInterval)
+			}
+		}).then((result) => {
+			/* Read more about handling dismissals below */
+			if (result.dismiss === Swal.DismissReason.timer) {
+				console.log('Message was closed by the timer')
+			}
+		})
+		var doc = new jsPDF();
+		doc.text(20, 20, 'SantaFeria - Lista de Usuarios');
+		var usuariosBody = []
+			<% for (var i = 0; i < users.rows.length; i++) {%>
+				usuariosBody.push(['<%= users.rows[i].rutpas%>',
+					'<%= users.rows[i].nombrecompleto%>',
+					'<%= users.rows[i].tipo%>',
+					'<%= users.rows[i].email%>',
+					'<%= users.rows[i].telefono%>']);
+		<% } %>
+			doc.autoTable({
+				head: [['Rut',
+					'Nombre Completo',
+					'Tipo de Usuario',
+					'Correo Electrónico',
+					'Num. Teléfono']],
+				body: usuariosBody,
+				startY: 30,
+			})
+
+		doc.save('SantaFeria - Reporte de Usuarios.pdf');
+	}
+
+	function genInvReporte() {
+		let timerInterval
+		Swal.fire({
+			title: 'Generando Reporte...',
+			timer: 2000,
+			timerProgressBar: true,
+			onBeforeOpen: () => {
+				Swal.showLoading()
+				timerInterval = setInterval(() => {
+					const content = Swal.getContent()
+					if (content) {
+						const b = content.querySelector('b')
+						if (b) {
+							b.textContent = Swal.getTimerLeft()
+						}
+					}
+				}, 100)
+			},
+			onClose: () => {
+				clearInterval(timerInterval)
+			}
+		}).then((result) => {
+			/* Read more about handling dismissals below */
+			if (result.dismiss === Swal.DismissReason.timer) {
+				console.log('Message was closed by the timer')
+			}
+		})
+		var doc = new jsPDF();
+		doc.text(20, 20, 'SantaFeria - Lista de Productos');
+		var comestiblesBody = []
+			<% for (var i = 0; i < comestibles.rows.length; i++) {%>
+				comestiblesBody.push(['<%= comestibles.rows[i].codigo%>',
+					'<%= comestibles.rows[i].nombre%>',
+					'<%= comestibles.rows[i].marca%>',
+					'<%= comestibles.rows[i].stockmin%>',
+					'<%= comestibles.rows[i].stockact%>',
+					'<%= comestibles.rows[i].precio%>',
+					convert('<%= comestibles.rows[i].fechaelab%>'),
+					convert('<%= comestibles.rows[i].fechavenc%>'),
+					'<%= comestibles.rows[i].disp%>'])
+				<% } %>
+
+					doc.text(20, 30, 'Productos Comestibles');
+
+		doc.autoTable({
+			head: [['Código',
+				'Nombre',
+				'Marca',
+				'Stock Mínimo',
+				'Stock Actual',
+				'Precio',
+				'Elaboración',
+				'Vencimiento',
+				'Disp.']],
+			body: comestiblesBody,
+			startY: 40
+		})
+
+		doc.addPage();
+		doc.text(20, 20, 'Productos No Comestibles');
+		var nocomestiblesBody = [];
+		<% for (var i = 0; i < nocomestibles.rows.length; i++) {%>
+			nocomestiblesBody.push(['<%= nocomestibles.rows[i].codigo%>',
+				'<%= nocomestibles.rows[i].nombre%>',
+				'<%= nocomestibles.rows[i].marca%>',
+				'<%= nocomestibles.rows[i].stockmin%>',
+				'<%= nocomestibles.rows[i].stockact%>',
+				'<%= nocomestibles.rows[i].precio%>',
+				'<%= nocomestibles.rows[i].tipo2%>',
+				'<%= nocomestibles.rows[i].disp%>']);
+		<% } %>
+			doc.autoTable({
+				head: [['Código',
+					'Nombre',
+					'Marca',
+					'Stock Mínimo',
+					'Stock Actual',
+					'Precio',
+					'Tipo',
+					'Disponible']],
+				body: nocomestiblesBody,
+				startY: 30
+			})
+		doc.text(20, 40, ' ');
+		doc.save('SantaFeria - Reporte de Productos.pdf');
+	}
+
+	function genVentasReporte() {
+		let timerInterval
+		Swal.fire({
+			title: 'Generando Reporte de Ventas...',
+			timer: 2000,
+			timerProgressBar: true,
+			onBeforeOpen: () => {
+				Swal.showLoading()
+				timerInterval = setInterval(() => {
+					const content = Swal.getContent()
+					if (content) {
+						const b = content.querySelector('b')
+						if (b) {
+							b.textContent = Swal.getTimerLeft()
+						}
+					}
+				}, 100)
+			},
+			onClose: () => {
+				clearInterval(timerInterval)
+			}
+		}).then((result) => {
+			if (result.dismiss === Swal.DismissReason.timer) {
+				console.log('Message was closed by the timer')
+			}
+		})
+
+		var doc = new jsPDF();
+		doc.text(20, 20, 'SantaFeria - Lista de Ventas');
+		var ventasBody = [];
+		var ventSelect = [];
+		var todo = document.getElementById("datepicker").value;
+		var todo2 = document.getElementById("datepicker2").value;
+		
+		<% for (var i = 0; i < ventas.rows.length; i++) {%>
+			if (todo <= convert('<%= ventas.rows[i].fechaventa%>') &&
+				todo2 >= convert('<%= ventas.rows[i].fechaventa%>')) {
+				ventasBody.push(['<%= ventas.rows[i].codigo%>',
+					'<%= ventas.rows[i].montototal%>',
+					'<%= ventas.rows[i].mediopago%>',
+					convert('<%= ventas.rows[i].fechaventa%>'),
+					'<%= ventas.rows[i].cant%>']);
+				ventSelect.push('<%= ventas.rows[i].codigo%>');
+			}
+		<% } %>
+			doc.autoTable({
+				head: [['Código',
+					'Monto Total',
+					'Medio de Pago',
+					'F. Venta',
+					'Cant. Prod']],
+				body: ventasBody,
+				startY: 30,
+			})
+		doc.addPage();
+		doc.text(20, 20, 'Productos Vendidos');
+		var prodvend = [];
+		<% for (var i = 0; i < prodvents.rows.length; i++) {%>
+			if (ventSelect.includes('<%= prodvents.rows[i].codigov%>')) {
+				prodvend.push(['<%= prodvents.rows[i].codigov%>',
+					'<%= prodvents.rows[i].nombre%>',
+					'<%= prodvents.rows[i].tipo%>',
+					'<%= prodvents.rows[i].cantproductos%>',
+					'<%= prodvents.rows[i].precio%>',
+					'<%= prodvents.rows[i].monto%>']);
+			}
+		<% } %>
+			doc.autoTable({
+				head: [['Código Venta',
+					'Nombre Producto',
+					'Tipo',
+					'Cantidad Comprada',
+					'Precio',
+					'Monto']],
+				body: prodvend,
+				startY: 30,
+			})
+
+		doc.save('SantaFeria - Reporte de Ventas.pdf');
+	}
+	function compFechas() {
+		var todo = document.getElementById("datepicker");
+		var todo2 = document.getElementById("datepicker2");
+		console.log("{" + todo.value + " , " + todo2.value + "} \n")
+		if (todo.value == "" || todo2.value == "") {
+			Swal.fire({
+				icon: 'error',
+				title: 'Oops...',
+				text: 'Debes seleccionar fechas válidas!',
+			});
+		} else {
+			if (todo.value > todo2.value) {
+				Swal.fire({
+					icon: 'error',
+					title: 'Oops...',
+					text: 'La "fecha 1" debe ser anterior a la "fecha 2"!',
+				});
+			} else {
+				genVentasReporte();
+			}
+		}
+	}
+
+</script>
+<script>
+	$(function () {
+		$("#datepicker").datepicker();
+		$("#datepicker").datepicker("option", "dateFormat", "yy-mm-dd");
+		$("#datepicker2").datepicker();
+		$("#datepicker2").datepicker("option", "dateFormat", "yy-mm-dd");
+	});
+</script>
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="icon" href="images\favicon\favicon.ico" type="image/x-icon" />
+	<title>Reportes</title>
+
+
+</head>
+<img src="images\funky_kong_05.png" alt="" style="position: absolute; top: 100px; left: 5px; width:330px;height:310px;">
+<img src="images\dk_render_dride.gif" alt=""
+	style="position: absolute; top: 80px; right: 15px; width:300px;height:300px;">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+	<a class="navbar-brand" style="font-family: dkfont;cursor: default;color: white"> <img src="images\apple.png"
+			width="30" height="30" class="d-inline-block align-top" alt=""> SantaFeria App</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+		aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="collapse navbar-collapse" id="navbarNav">
+		<ul class="navbar-nav">
+			<li class="nav-item dropdown" id="navInv">
+
+				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink" data-toggle="dropdown"
+					aria-haspopup="true" aria-expanded="false">
+					Inventario
+				</a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href='/addProduct'>Agregar Producto</a>
+					<a class="dropdown-item" href='/listProducts'>Lista de Productos</a>
+				</div>
+			</li>
+			<li class="nav-item dropdown" id="navVen">
+				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink2" data-toggle="dropdown"
+					aria-haspopup="true" aria-expanded="false">
+					Ventas
+				</a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href='/makeSale'>Realizar Venta</a>
+					<a class="dropdown-item" href='/listSales'>Lista de Ventas</a>
+				</div>
+			</li>
+
+			<li class="nav-item dropdown" id="navAdm">
+				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink3" data-toggle="dropdown"
+					aria-haspopup="true" aria-expanded="false">
+					Administrador
+				</a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item" href='/addUser'>Agregar Usuario</a>
+					<a class="dropdown-item" href='/listUsers'>Lista de Usuarios</a>
+					<a class="dropdown-item" href='/reportManag'>Gestión de Reportes</a>
+				</div>
+
+			</li>
+			<li class="nav-item dropdown" style="position: absolute; right: 120px">
+
+				<a class="nav-link dropdown-toggle" href="#" id="navbarDropdownMenuLink3" data-toggle="dropdown"
+					aria-haspopup="true" aria-expanded="false"> <img src="\images\user.png" width="30" height="30">
+					Sesión
+				</a>
+				<div class="dropdown-menu" aria-labelledby="navbarDropdownMenuLink">
+					<a class="dropdown-item">
+						<p id="user" style="color: black"></p>
+					</a>
+					<script>
+						document.getElementById("user").innerHTML = "<%=sesion.nameUser%>";
+					</script>
+					<a class="dropdown-item" href="/passChange">Cambiar Contraseña</a>
+					<script>
+						function logout() {
+							Swal.fire({
+								title: '¿Estás seguro de que quieres cerrar sesión?',
+								icon: 'warning',
+								showCancelButton: true,
+								confirmButtonColor: '#3085d6',
+								cancelButtonColor: '#d33',
+								cancelButtonText: 'Cancelar',
+								confirmButtonText: 'Confirmar'
+							}).then((result) => {
+								if (result.value) {
+									let timerInterval;
+									Swal.fire({
+										title: 'Hasta la próxima!',
+										timer: 2000,
+										timerProgressBar: true,
+										onBeforeOpen: () => {
+											Swal.showLoading()
+											timerInterval = setInterval(() => {
+												const content = Swal.getContent()
+												if (content) {
+													const b = content.querySelector('b')
+													if (b) {
+														b.textContent = Swal.getTimerLeft()
+													}
+												}
+											}, 100)
+										},
+										onClose: () => {
+											clearInterval(timerInterval)
+										}
+									}).then((result) => {
+										/* Read more about handling dismissals below */
+										if (result.dismiss === Swal.DismissReason.timer) {
+											console.log('Message was closed by the timer')
+										}
+									});
+									window.location = '/';
+								}
+							})
+						}
+					</script>
+					<a class="dropdown-item" onclick="logout()" style="cursor:pointer">Cerrar Sesión</a>
+				</div>
+			</li>
+		</ul>
+	</div>
+
+</nav>
+<div>
+	<break></break>
+</div>
+
+<body>
+	<ol id="tabla"></ol>
+	<script>
+		$("#tabla").load("ListaUsers.html #tablaUser table");
+		console.log(document.getElementById("tabla"));
+	</script>
+	<img src="images\textura dk.jpg" alt="" style="border-radius: 15% ;position: absolute; top: 60px; 
+	left: 355px; width:671px;height:120px;">
+	<div class="container" align="center">
+		<div class="titulos" align="center">
+			<h1 class="display-3" style="position: absolute;font-family: dkfont; font-size: 72px; color:red; font-weight: bold;text-shadow: 2px 0 0 #ffee00, -2px 0 0 		#ffee00, 0 2px 0 #ffee00, 0 -2px 0
+			#ffee00, 1px 1px #ffee00, -1px -1px 0 #ffee00, 1px -1px 0 #ffee00, 1px -1px 0 #ffee00, 
+			1px -1px 0 #ffee00, -1px 1px 0 #ffee00">Gestión de reportes</h1>
+			<!-- <p class="lead">Por favor, inicie sesión con los datos solicitados debajo</p> -->
+		</div>
+	</div>
+	<br> <br> <br> <br> <br>
+	</div>
+	<div class="container" align="center" style="width: 770px; max-height: 400px">
+		<div class="cuerpo" align="center" style="width: 770px; max-height: 400px">
+			<div class="container">
+				<button type="button" class="btn btn-danger" onClick="genInvReporte()">Generar reporte de
+					inventario</button>
+				<button type="button" class="btn btn-info" onClick="genUserReporte()">Generar reporte de
+					usuarios</button>
+
+			</div>
+
+			<div class="container">
+				<div class="container">
+					<div class="col-sm-6" align="center" style="height:130px;">
+						<div class="form-group" style="">
+							<div> <label>Seleccione rango de fechas</label> </div>
+							<div class="input-group date" style="" id="datetimepicker8">
+								<p>Fecha 1: <input type="text" style="max-height: 30px; border-radius: 8%;"
+										id="datepicker"></p>
+								<span class="input-group-text" style="max-height: 35px">
+									<span class="fa fa-calendar">
+									</span>
+								</span>
+								<p>Fecha 2: <input type="text" style="max-height: 30px; border-radius: 8%;"
+										id="datepicker2"></p>
+								<span class="input-group-text" style="max-height: 35px;">
+									<span class="fa fa-calendar" style="">
+									</span>
+								</span>
+							</div>
+							<button type="button" class="btn btn-success" onClick="compFechas()">Generar reporte de
+								ventas</button>
+						</div>
+					</div>
+				</div>
+
+			</div>
+			<div class="container">
+
+			</div>
+		</div>
+	</div>
+
+
+</body>
+
+
+
+<footer class="foo footer-dark bg-dark">
+	<div class="footer-copyright text-center py-1">© 2020 Copyright:
+		<a> SantaFeria</a>
+	</div>
+	<!-- Copyright -->
+
+</footer>
+
+</html>

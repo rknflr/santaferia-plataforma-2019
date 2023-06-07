@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<link rel="stylesheet" href="css\bootstrap.css" media="all">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="js\bootstrap.js"></script>
+<link rel="stylesheet" href="css\custom.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+<script src="https://cdn.jsdelivr.net/npm/promise-polyfill"></script>
+<!-- Función que ejecuta el modal al iniciar sesión (Sweet Alerts) -->
+<script>
+	function preventBack() { window.history.forward(); }
+	setTimeout("preventBack()", 0);
+	window.onunload = function () { null };
+	function validar() {
+		var rut = document.getElementById("rut").value;
+		var pass = document.getElementById("pwd").value;
+		if (isNaN(rut) || rut == "" || pass == "" || rut.toString().length < 7 || pass.toString().length < 4) {
+			Swal.fire({
+				icon: 'error',
+				title: 'Oops...',
+				text: 'Los datos ingresados no son validos.',
+			});
+		}
+		else {
+			swalLogin();
+		}
+	}
+	function swalLogin() {
+		let timerInterval
+		Swal.fire({
+			title: 'Iniciando Sesión...',
+			timer: 2000,
+			timerProgressBar: true,
+			onBeforeOpen: () => {
+				Swal.showLoading()
+				timerInterval = setInterval(() => {
+					const content = Swal.getContent()
+					if (content) {
+						const b = content.querySelector('b')
+						if (b) {
+							b.textContent = Swal.getTimerLeft()
+						}
+					}
+				}, 100)
+			},
+			onClose: () => {
+				clearInterval(timerInterval)
+			}
+		}).then((result) => {
+			/* Read more about handling dismissals below */
+			if (result.dismiss === Swal.DismissReason.timer) {
+				console.log('Message was closed by the timer')
+			}
+		})
+		document.getElementById("login").submit();
+	}
+
+</script>
+
+
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
+	<meta http-equiv="X-UA-Compatible" content="ie=edge">
+	<link rel="icon" href="images\favicon\favicon.ico" type="image/x-icon" />
+	<title>Login</title>
+
+</head>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+	<a href="/" class="navbar-brand" style="cursor: default; color: white; font-family: dkfont"> <img
+			src="images\apple.png" width="30" height="30" class="d-inline-block align-top" alt=""> SantaFeria App</a>
+	<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+		aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+		<span class="navbar-toggler-icon"></span>
+	</button>
+	<div class="collapse navbar-collapse" id="navbarNav">
+		<ul class="navbar-nav">
+
+		</ul>
+	</div>
+</nav>
+
+
+
+<body>
+	<img src="images\textura dk.jpg" alt=""
+		style="border-radius: 15% ;position: absolute; top: 60px; left: 347px; width:630px;height:130px;">
+	<p style="margin-top: 0px">
+		<img src="images\kongs2.png" alt="" style="float:left;width:333px;height:550px;">
+	</p>
+
+	<div class="container" align="">
+		<div class="titulos" align="">
+			<h1 class="display-3"
+				style="position: absolute;font-family: dkfont; font-size: 88px; color:red; font-weight: bold;text-shadow: 2px 0 0 #ffee00, -2px 0 0 		#ffee00, 0 2px 0 #ffee00, 0 -2px 0
+			#ffee00, 1px 1px #ffee00, -1px -1px 0 #ffee00, 1px -1px 0 #ffee00, 1px -1px 0 #ffee00, 1px -1px 0 #ffee00, -1px 1px 0 #ffee00">Inicio
+				de Sesión</h1>
+			<!-- <p class="lead">Por favor, inicie sesión con los datos solicitados debajo</p> -->
+		</div>
+	</div>
+	<p>
+		<img src="images\banana.png" alt="" style="float:right; top: 300px;width:400px;height:456px;">
+	</p>
+	<br> <br> <br> <br> <br> <br>
+
+	<% if(resultado != ""){ %>
+	<div class="container" align="center" style="width: 600px; height: 70px">
+		<div class="alert alert-<%=restipo%>">
+			<strong>Alerta </strong>: <%=resultado%>
+		</div>
+	</div>
+	<% } %>
+
+	<div class="login-form" align="center">
+		<div class="cuerpo" align="left" style="padding: 20px">
+			<form action="/" id="login" method="post">
+				<label for="Rut"> Rut (sin dígito verificador)</label>
+				<input type="text" class="form-control" id="rut" name="rut" pattern="[0-9]{7,}" minlength="7"
+					maxlength="8" placeholder="Ej: 11222333" required>
+				<label for="pwd"> Contraseña </label>
+				<input type="password" class="form-control" id="pwd" name="pwd" minlength="4" maxlength="8"
+					placeholder="*********" required>
+
+				<div class="container" align="right" style="padding: 5px">
+					<input type="button" class="btn btn-info" id="isLogin" onclick="validar()" value="Iniciar Sesión">
+					<button type="button" class="btn btn-secondary" data-toggle="modal"
+						data-target="#exampleModalLong">Recuperar Contraseña</button>
+				</div>
+
+			</form>
+		</div>
+	</div>
+
+	<div class="modal fade" id="exampleModalLong" tabindex="-1" role="dialog" aria-labelledby="exampleModalLongTitle"
+		aria-hidden="true">
+		<div class="modal-dialog" role="document">
+			<div class="modal-content bg-dark" style="color: white">
+				<div class="modal-header">
+					<h5 class="modal-title" id="exampleModalLongTitle">Recuperar Contraseña</h5>
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+						<span aria-hidden="true">&times;</span>
+					</button>
+				</div>
+				<div class="modal-body">
+					<div class="container" align="left">
+						<form action="getPassw" method="post">
+							<label for="Rut"> Rut (sin dígito verificador)</label>
+							<input type="text" class="form-control " pattern="[0-9]{7,}" minlength="7" maxlength="8"
+								name="rut2" placeholder="Ej: 11222333">
+							<label for="Email"> Correo electrónico </label>
+							<input type="email" class="form-control" name="mailrec" placeholder="correo@algo.com">
+							<label> </label>
+							<div>
+								<input type="submit" class="btn btn-success"
+									value="Enviar contraseña al correo"></button>
+							</div>
+						</form>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+
+</body>
+
+<footer class="foo footer-dark bg-dark">
+	<div class="footer-copyright text-center py-1">© 2020 Copyright:
+		<a> SantaFeria</a>
+	</div>
+	<!-- Copyright -->
+
+</footer>
+
+</html>
