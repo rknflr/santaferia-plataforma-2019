@@ -1,4 +1,4 @@
-# Santa Feria - Plataforma Web
+# Plataforma Web: Santa Feria
 
 Proyecto enfocado en el manejo de productos de una feria, tanto en la compra y venta de productos como en la actualización de stock.
 
